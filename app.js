@@ -1,5 +1,15 @@
 (() => {
   "use strict";
+  const header = document.querySelector(".site-header");
+  let headerFrame = 0;
+  function updateHeader() {
+    header?.classList.toggle("is-scrolled", window.scrollY > 24);
+    headerFrame = 0;
+  }
+  window.addEventListener("scroll", () => {
+    if (!headerFrame) headerFrame = requestAnimationFrame(updateHeader);
+  }, {passive:true});
+  updateHeader();
   const films = window.jielingFilms || [];
   const byId = new Map(films.map(film => [film.id, film]));
   const dialog = document.getElementById("film-dialog");
@@ -58,6 +68,7 @@
       });
       chapters.appendChild(button);
     }
+    const restoreSwitcherFocus = switcher.contains(document.activeElement);
     switcher.replaceChildren();
     for (const item of films) {
       const button = document.createElement("button");
@@ -67,6 +78,7 @@
       button.addEventListener("click", () => openFilm(item.id, null, true));
       switcher.appendChild(button);
     }
+    if (restoreSwitcherFocus) switcher.querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
     if (!dialog.open) dialog.showModal();
     document.body.classList.add("modal-open");
     if (location.hash !== "#demo-" + id) history.replaceState(null, "", "#demo-" + id);
